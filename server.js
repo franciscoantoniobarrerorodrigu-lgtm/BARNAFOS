@@ -336,4 +336,13 @@ app.get(['/', '/health', '/ping'], (req, res) => {
 
 app.listen(PORT, () => {
     console.log(`[Render Sports Proxy] Running on port ${PORT}`);
+
+    // Auto Keep-Alive: Ping cada 10 minutos para evitar que Render entre en reposo (24/7 activo)
+    const KEEP_ALIVE_URL = process.env.RENDER_EXTERNAL_URL || 'https://barnafos.onrender.com';
+    setInterval(() => {
+        fetch(`${KEEP_ALIVE_URL}/ping`)
+            .then(r => r.json())
+            .then(() => console.log(`[KeepAlive] Ping a ${KEEP_ALIVE_URL} exitoso`))
+            .catch(err => console.error('[KeepAlive] Error:', err.message));
+    }, 10 * 60 * 1000);
 });
