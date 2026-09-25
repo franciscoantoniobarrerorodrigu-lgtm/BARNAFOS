@@ -329,9 +329,35 @@ app.all(['/api/proxy', '/proxy'], (req, res) => {
     }
 });
 
+// ─── 5. Handlers de Streaming VOD (LuluStream & StreamHG) ───
+const playStreamHg = require('./play-streamhg');
+app.all(['/api/play-streamhg', '/play-streamhg'], playStreamHg);
+
+const playLuluStream = require('./play-lulustream');
+app.all(['/api/play-lulustream', '/play-lulustream'], playLuluStream);
+
+app.all(['/api/lulu-view', '/lulu-view'], async (req, res) => {
+    res.setHeader('Access-Control-Allow-Origin', '*');
+    res.setHeader('Access-Control-Allow-Methods', 'GET, HEAD, OPTIONS');
+    res.setHeader('Cache-Control', 'no-cache, no-store');
+    const code = req.query.code;
+    if (!code) return res.status(400).send('Missing code');
+    try {
+        await fetch(`https://luluvdo.com/e/${code}`, {
+            headers: {
+                'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36',
+                'Referer': 'https://luluvdo.com/'
+            }
+        });
+        return res.status(200).send('OK');
+    } catch(e) {
+        return res.status(200).send('OK');
+    }
+});
+
 // Health checks
 app.get(['/', '/health', '/ping'], (req, res) => {
-    res.status(200).json({ status: 'online', service: 'BarnaFOS Sports Proxy (Render Dedicated)' });
+    res.status(200).json({ status: 'online', service: 'BarnaFOS Sports & VOD Proxy (Render Dedicated)' });
 });
 
 app.listen(PORT, () => {
